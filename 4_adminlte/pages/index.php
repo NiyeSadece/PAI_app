@@ -44,6 +44,8 @@ ERROR;
 		unset($_SESSION["error"]);
 	}
 	?>
+
+
   <div class="card card-outline card-primary">
     <div class="card-header text-center">
       <a href="#" class="h1"><b>Kukła</a>
@@ -51,6 +53,7 @@ ERROR;
     <div class="card-body">
       <p class="login-box-msg">Zaloguj się aby zarezerwować stolik</p>
 
+        <!- Formularz logowania>
       <form action="../scripts/login.php" method="post">
         <div class="input-group mb-3">
           <input type="email" class="form-control" placeholder="Podaj email" name="email" autofocus>

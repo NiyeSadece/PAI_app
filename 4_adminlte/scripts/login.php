@@ -1,85 +1,76 @@
 <?php
-	if ($_SERVER["REQUEST_METHOD"] == "POST"){
-		session_start();
-		foreach ($_POST as $value){
-			if (empty($value)){
-				$_SESSION["error"] = "Wypełnij wszystkie pola!";
-				echo "<script>history.back();</script>";
-				exit();
-			}
-		}
+session_start();
+foreach ($_POST as $value){
+    if (empty($value)){
+        $_SESSION["error"] = "Wypełnij wszystkie pola!";
+        echo "<script>history.back();</script>";
+        exit();
+    }
+}
 
-		require_once "./connect.php";
+require_once "./connect.php";
 
-		try {
+try {
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
 
-			$stmt = $conn->prepare("SELECT * FROM `users`  WHERE email = ?");
+    $stmt->bind_param("s", $_POST["email"]);
 
-			$stmt->bind_param("s", $_POST["email"]);
+    $stmt->execute();
 
-			$stmt->execute();
+    $result = $stmt->get_result();
+//	echo $result->num_rows;
 
-			$result = $stmt->get_result();
 
-            if ($result->num_rows != 0){
-                $user = $result->fetch_assoc();
-                //var_dump($user);
-                if (password_verify($_POST["pass"], $user["password"])) {
-                    //echo "zalogowany";
-                    $_SESSION["logged"]["firstName"] = $user["firstName"];
-                    $_SESSION["logged"]["lastName"] = $user["lastName"];
-                    $_SESSION["logged"]["logo"] = $user["logo"];
-                    $_SESSION["logged"]["session_id"] = session_id();
-                    $_SESSION["logged"]["role_id"] = $user["role_id"];
-                    $_SESSION["logged"]["last_activity"] = time();
+    if ($result->num_rows != 0){
+        $user = $result->fetch_assoc();
+        //echo $user["password"];
+        if (password_verify($_POST["pass"], $user["password"])){
+            echo "zalogowany";
+            $_SESSION["logged"]["firstName"] = $user["firstName"];
+            $_SESSION["logged"]["lastName"] = $user["lastName"];
+            //$_SESSION["logged"]["logo"] = $user["logo"];
+            $_SESSION["logged"]["role_id"] = $user["role_id"];
+            $_SESSION["logged"]["session_id"] = session_id();
+            $_SESSION["logged"]["last_activity"] = time();
 
-//					//czas sesji
-                $sessionLifeTime = ini_get("session.gc_maxlifetime");
-//					//echo $sessionLifeTime; //1440  =>  24 minuty
-                $sessionLifeTimeFormated = gmdate('i', 1800);
-//					//echo $sessionLifeTimeFormated; //sesja jest ustawiona na 30 minut
-//					//session_status() => 0, 1, 2  => 2 - jest prawidłowa
+            //czas sesji
+            $sessionLifeTime = ini_get("session.gc_maxlifetime");
+           //1440  =>  24 minuty
+            $sessionLifeTimeFormated = gmdate('i', 1800);
+            //sesja jest ustawiona na 30 minut
 
-//
-//					//logs
-                $status = 1;
-                $address_ip = $_SERVER["SERVER_ADDR"];
+            //logs
+            $status = 1;
+            $address_ip = $_SERVER["SERVER_ADDR"];
 
-                $sql = "INSERT INTO `logs` (`user_id`, `status`, `address_ip`) VALUES (?, ?, ?);";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("iss", $user["id"], $status, $address_ip);
-                $stmt->execute();
+            $sql = "INSERT INTO `logs` (`user_id`, `status`, `address_ip`) VALUES (?, ?, ?);";
+            $stmt->prepare($sql);
+            $stmt->bind_param("iss", $user["id"], $status, $address_ip);
+            $stmt->execute();
 
-                header("location: ../pages/views/logged.php");
-                exit();
+            header("location: ../pages/views/logged.php");
+            exit();
 
-				    }else { //od tej części kod świruje
-                     //echo "niezalogowany";
-                     $_SESSION["error"] = "Błędny login lub hasło!";
-                     $status = 0;
-                     $address_ip = $_SERVER["SERVER_ADDR"];
-                    //czy nie powinno tu być created_at w prepared stmt?
-                     $sql = "INSERT INTO `logs` (`user_id`, `status`, `address_ip`) VALUES (?, ?, ?);";
-                    $stmt = $conn->prepare($sql);
-                     $stmt->bind_param("iss", $user["id"], $status, $address_ip);
-                      $stmt->execute();
+        }else{
+            echo "niezalogowany";
+            $_SESSION["error"] = "Błędny login lub hasło!";
+            $status = 0;
+            $address_ip = $_SERVER["SERVER_ADDR"];
 
-                    echo "<script>history.back();</script>";
-                    exit();
-                 }
-			}
-            else
-            {
-                $_SESSION["error"] = "Błędne logowanie!";
-                echo "<script>history.back();</script>";
-            }
+            $sql = "INSERT INTO `logs` (`user_id`, `status`, `address_ip`) VALUES (?, ?, ?);";
+            $stmt->prepare($sql);
+            $stmt->bind_param("iss", $user["id"], $status, $address_ip);
+            $stmt->execute();
 
+            echo "<script>history.back();</script>";
+            exit();
         }
-        catch (mysqli_sql_exception $e)
-          {
-            $_SESSION["error"] = $e->getMessage();
-			echo "<script>history.back();</script>";
-          }
-	}
+    }else{
+        $_SESSION["error"] = "Błędne logowanie!";
+        echo "<script>history.back();</script>";
+    }
 
-	header("location: ../pages");
+} catch (mysqli_sql_exception $e) {
+    $_SESSION["error"] = $e->getMessage();
+    echo "<script>history.back();</script>";
+}

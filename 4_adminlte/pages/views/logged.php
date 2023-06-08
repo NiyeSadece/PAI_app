@@ -3,18 +3,17 @@
   if (!isset($_SESSION["logged"]) || session_status() != 2){
     header("location: ../");
   }else{
-    switch($_SESSION["logged"]["role_id"]){
-      case 1:
+        switch($_SESSION["logged"]["role_id"]){
+    case 1:
         $role_path = "logged_user";
         break;
-	    case 2:
-		    $role_path = "logged_moderator";
-		    break;
-	    case 3:
-		    $role_path = "logged_admin";
-		    break;
-    }
-  }
+    case 2:
+        $role_path = "logged_moderator";
+        break;
+    case 3:
+        $role_path = "logged_admin";
+        break;
+  }}
 
   if (isset($_SESSION["logged"]["last_activity"])){
     $lastActivityTime = $_SESSION["logged"]["last_activity"];

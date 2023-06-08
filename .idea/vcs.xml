@@ -4,6 +4,5 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/PAI_aplikacja" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/PAI_apllikacja" vcs="Git" />
   </component>
 </project>

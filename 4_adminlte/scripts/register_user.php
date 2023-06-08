@@ -45,9 +45,9 @@ try {
 
 	$stmt = $conn->prepare("INSERT INTO `users` (`firstName`, `lastName`,`email`, `password`,  `phoneNumber`, `role_id`, `created_at`) VALUES (?, ?, ?, ?, ?, ?, current_timestamp());");
 
-	$pass = password_hash($_POST["pass1"], PASSWORD_ARGON2ID);
+	$hash = password_hash($_POST["pass1"], PASSWORD_ARGON2ID);
 
-	$stmt->bind_param("sssssi", $_POST["firstName"], $_POST["lastName"], $_POST["email1"], $pass, $_POST["phoneNumber"], $role_id);
+	$stmt->bind_param("sssssi", $_POST["firstName"], $_POST["lastName"], $_POST["email1"], $hash, $_POST["phoneNumber"], $role_id);
 
 	$stmt->execute();
 
